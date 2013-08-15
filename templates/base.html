@@ -1,0 +1,14 @@
+{% extends "bootstrap_responsive.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{%- block bootstrap_js_bottom %}
+{{super()}}
+{% assets "js_all" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{%- endblock bootstrap_js_bottom %}
+{%- block style %}
+{{super()}}
+{% assets "css_all" %}
+<link type="text/css" src="{{ ASSET_URL }}">
+{% endassets %}
+{%- endblock style %}
