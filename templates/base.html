@@ -9,6 +9,28 @@
 {%- block style %}
 {{super()}}
 {% assets "css_all" %}
-<link type="text/css" src="{{ ASSET_URL }}">
+    <link href="{{ ASSET_URL }}" rel="stylesheet">
 {% endassets %}
 {%- endblock style %}
+
+{% block body_content %}
+<div class="navbar navbar-fixed-top navbar-inverse">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="#">BISD Inventory</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li class="active"><a href="#">Home</a>
+                    <li ><a href="#">Page 1</a>
+                    <li ><a href="#">Page 2</a>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body_content %}
