@@ -7,7 +7,7 @@ import ddl
 app = Flask(__name__)
 app.config['BOOTSTRAP_FONTAWESOME'] = True
 app.config['BOOTSTRAP_USE_CDN'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://memory'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 Bootstrap(app)
 CsrfProtect(app)
 
