@@ -1,7 +1,10 @@
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from flask import Flask
 from sqlalchemy import Column, Integer, Numeric, Unicode, UnicodeText, DateTime, Binary
-from sqlalchemy import Table, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.ext.declarative import declared_attr
+import flask.ext.sqlalchemy
+from application import app
+
 
 # Create base class with default table name and id
 class Base(object):
@@ -9,13 +12,18 @@ class Base(object):
     def __tablename__(cls):
         return cls.__name__.lower()
     id = Column(Integer, primary_key=True)
-Base = declarative_base(cls=Base)
+
+
+# Overwrite default model
+flask.ext.sqlalchemy.Model = Base
+from flask.ext.sqlalchemy import SQLAlchemy
+db = SQLAlchemy(app)
 
 class MetadataMixin(object):
     @declared_attr
     def events(cls):
         joinstr = '{0}.id == foreign(Event.table_id) and Event.type == "{1}"'.format(cls.__name__, cls.__tablename__)
-        return relationship('Event', primaryjoin=joinstr, backref=cls.__name__.lower())
+        return db.relationship('Event', primaryjoin=joinstr, backref=cls.__name__.lower())
 
     @declared_attr
     def notes(cls):
@@ -25,9 +33,9 @@ class MetadataMixin(object):
     @declared_attr
     def attachments(cls):
         joinstr = '{0}.id == foreign(Attachment.table_id) and Attachment.type == "{1}"'.format(cls.__name__, cls.__tablename__)
-        return relationship('Attachment', primaryjoin=joinstr, backref=cls.__name__.lower())
+        return db.relationship('Attachment', primaryjoin=joinstr, backref=cls.__name__.lower())
 
-user_permission = Table('user_permission', Base.metadata,
+user_permission = db.Table('user_permission', db.metadata,
      Column('user_id', Integer, ForeignKey('user.id')),
      Column('permission_id', Integer, ForeignKey('permission.id'))
      )
@@ -38,7 +46,7 @@ class Event(Base):
     table_id = Column(Integer, nullable=False, index=True)
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    user = relationship('User', backref=backref('events', order_by='Event.date'))
+    user = db.relationship('User', backref=db.backref('events', order_by='Event.date'))
 
     date = Column(DateTime, nullable=False, index=True)
     attr = Column(Unicode(50), nullable=False)
@@ -54,7 +62,7 @@ class Note(Base):
     table_id = Column(Integer, nullable=False, index=True)
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    user = relationship('User', backref=backref('notes', order_by='Note.date'))
+    user = db.relationship('User', backref=db.backref('notes', order_by='Note.date'))
 
     date = Column(DateTime, nullable=False, index=True)
     text = Column(UnicodeText, nullable=False)
@@ -68,7 +76,7 @@ class Attachment(Base):
     table_id = Column(Integer, nullable=False, index=True)
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    user = relationship('User', backref=backref('attachments', order_by='Attachment.id'))
+    user = db.relationship('User', backref=db.backref('attachments', order_by='Attachment.id'))
 
     name = Column(Unicode(50), nullable=False)
     sha256hash = Column(Binary, nullable=False)
@@ -89,7 +97,7 @@ class User(Base):
     username = Column(Unicode(50), nullable=False, unique=True, index=True)
     name = Column(Unicode(50), nullable=False, index=True)
 
-    permissions = relationship('Permission', secondary=user_permission, backref='users')
+    permissions = db.relationship('Permission', secondary=user_permission, backref='users')
 
     def __repr__(self):
         return '<User({0})>'.format(self.username)
@@ -111,10 +119,10 @@ class Device(MetadataMixin, Base):
     bag_tag = Column(Unicode(50), index=True)
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    user = relationship('User', backref=backref('devices', order_by='Device.id'))
+    user = db.relationship('User', backref=db.backref('devices', order_by='Device.id'))
 
     device_type_id = Column(Integer, ForeignKey('device_type.id'), nullable=False, index=True)
-    device_type = relationship('Device_Type', backref=backref('devices', order_by='Device.id'))
+    device_type = db.relationship('Device_Type', backref=db.backref('devices', order_by='Device.id'))
 
     def __repr__(self):
         return '<Device({0})>'.format(self.inventory_number)
@@ -122,10 +130,10 @@ class Device(MetadataMixin, Base):
 class Charge(MetadataMixin, Base):
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    user = relationship('User', backref=backref('charges', order_by='Charge.id'))
+    user = db.relationship('User', backref=db.backref('charges', order_by='Charge.id'))
 
     device_id = Column(Integer, ForeignKey('device.id'), nullable=False, index=True)
-    device = relationship('Device', backref=backref('charges', order_by='Charge.id'))
+    device = db.relationship('Device', backref=db.backref('charges', order_by='Charge.id'))
 
     reason = Column(UnicodeText, nullable=False)
     amount = Column(Numeric(19,4), nullable=False)
@@ -136,7 +144,7 @@ class Charge(MetadataMixin, Base):
 class Payment(MetadataMixin, Base):
 
     charge_id = Column(Integer, ForeignKey('charge.id'), nullable=False, index=True)
-    charge = relationship('Charge', backref=backref('payments', order_by='Payment.id'))
+    charge = db.relationship('Charge', backref=db.backref('payments', order_by='Payment.id'))
 
     amount = Column(Numeric(19,4), nullable=False)
 
@@ -150,3 +158,4 @@ class Payment(MetadataMixin, Base):
 
     def __repr__(self):
         return '<Payment({0})>'.format(self.inventory_number)
+

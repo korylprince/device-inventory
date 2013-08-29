@@ -2,10 +2,12 @@ from flask import Flask, render_template
 from flask.ext.bootstrap import Bootstrap
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.assets import Environment, Bundle
+import ddl
 
 app = Flask(__name__)
 app.config['BOOTSTRAP_FONTAWESOME'] = True
 app.config['BOOTSTRAP_USE_CDN'] = True
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://memory'
 Bootstrap(app)
 CsrfProtect(app)
 
