@@ -3,12 +3,7 @@ from sqlalchemy import Column, Integer, Numeric, Unicode, UnicodeText, DateTime,
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.ext.declarative import declared_attr
 import flask.ext.sqlalchemy
-
-if __name__ == '__main__':
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-else:
-    from application import app
+from application import app
 
 # Create base class with default table name and id
 class Base(flask.ext.sqlalchemy.Model):
@@ -61,6 +56,9 @@ user_permission = db.Table('user_permission', db.metadata,
      Column('permission_id', Integer, ForeignKey('permission.id'))
      )
 
+class EventMessage(object):
+    pass
+
 class Event(MetadataMixin, db.Model):
 
     user = db.relationship('User', backref=db.backref('events', order_by='Event.date'))
@@ -85,7 +83,7 @@ class Attachment(MetadataMixin, db.Model):
 
     user = db.relationship('User', backref=db.backref('attachments', order_by='Attachment.id'))
 
-    name = Column(Unicode(50), nullable=False)
+    name = Column(Unicode(200), nullable=False)
     sha256hash = Column(Binary, nullable=False)
 
     def __repr__(self):
@@ -93,16 +91,16 @@ class Attachment(MetadataMixin, db.Model):
 
 class Permission(db.Model):
 
-    codename = Column(Unicode(50), nullable=False, index=True)
-    longname = Column(Unicode(50), nullable=False)
+    codename = Column(Unicode(100), nullable=False, index=True)
+    longname = Column(Unicode(100), nullable=False)
 
     def __repr__(self):
         return '<Permission({0})>'.format(self.username)
 
 class User(db.Model):
 
-    username = Column(Unicode(50), nullable=False, unique=True, index=True)
-    name = Column(Unicode(50), nullable=False, index=True)
+    username = Column(Unicode(100), nullable=False, unique=True, index=True)
+    name = Column(Unicode(100), nullable=False, index=True)
 
     permissions = db.relationship('Permission', secondary=user_permission, backref='users')
 
@@ -111,8 +109,8 @@ class User(db.Model):
 
 class Device_Type(db.Model):
 
-    manufacturer = Column(Unicode(50), nullable=False)
-    model = Column(Unicode(50), nullable=False)
+    manufacturer = Column(Unicode(200), nullable=False)
+    model = Column(Unicode(200), nullable=False)
 
     __table_args__ = (UniqueConstraint('manufacturer','model'),)
 
@@ -121,9 +119,9 @@ class Device_Type(db.Model):
 
 class Device(HasMetadataMixin, db.Model):
 
-    inventory_number = Column(Unicode(50), unique=True, nullable=False, index=True)
-    serial_number = Column(Unicode(50), index=True)
-    bag_tag = Column(Unicode(50), index=True)
+    inventory_number = Column(Unicode(100), unique=True, nullable=False, index=True)
+    serial_number = Column(Unicode(100), index=True)
+    bag_tag = Column(Unicode(100), index=True)
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
     user = db.relationship('User', backref=db.backref('devices', order_by='Device.id'))

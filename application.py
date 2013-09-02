@@ -2,11 +2,9 @@ from flask import Flask, render_template
 from flask.ext.bootstrap import Bootstrap
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.assets import Environment, Bundle
-import ddl
+import model
 
 app = Flask(__name__)
-app.config['BOOTSTRAP_FONTAWESOME'] = True
-app.config['BOOTSTRAP_USE_CDN'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 Bootstrap(app)
 CsrfProtect(app)
@@ -26,4 +24,4 @@ def hello():
     return render_template('base.html')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
